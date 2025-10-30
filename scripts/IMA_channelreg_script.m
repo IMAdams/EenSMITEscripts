@@ -8,7 +8,7 @@
 % figure will save the displayed localizations and compute the transform.
 
 %% Create a list of the fiducial files.
-DataDir = 'C:\Users\imadams\Documents\smite workspace\20250723_HeLa_CRISPR_ALFA-EGFR_HA-TGF-BR2_SPTV2';
+DataDir = 'E:\LidkeLab\iX83\HelaALFAEGFR_10242025\VSI_to_mat';
 
 FiducialFileDirs = {fullfile(DataDir)...
     %fullfile(DataDir, '1')...

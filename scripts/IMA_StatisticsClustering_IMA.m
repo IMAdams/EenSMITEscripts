@@ -63,7 +63,7 @@ ROI_sizes = [2000, 2000];   % [delta_x, delta_y] (nm)
 A_ROI = prod(ROI_sizes);    % ROI area (nm^2)
 %Pixel2nm = 16000/150;       % conversion factor from pixels to nm
 %Pixel2nm = 108.018;         % pixels to nm [TIRF]
-Pixel2nm = 97.4;            % pixels to nm [sequential]
+Pixel2nm = 65.0;            % pixels to nm [sequential]
 Pixel2nmGlobal = Pixel2nm;
 CI = smi_cluster.ClusterInterface();
 
@@ -75,9 +75,9 @@ RT = smi_helpers.ROITools();
 % If GaussIm is true, make OriginLLvsUL false for consistency.  The default is:
 % GaussIm = false and OriginLLvsUL = true.  Currently, GaussIm only works for
 % single labeled molecules.
-% RT.GaussIm = true;    RT.OriginLLvsUL = false;
-GaussIm = true;
-OriginLLvsUL = true;
+RT.GaussIm = true;    RT.OriginLLvsUL = false;
+% GaussIm = true;
+% OriginLLvsUL = false;
 % RT.GaussIm = false;   RT.OriginLLvsUL = true;
 RT.SRzoom = 4;              % zoom factor for gaussianImage
 RT.ROI_sizes = ROI_sizes;   
@@ -87,14 +87,14 @@ RT.Pixel2nm = Pixel2nm;
 % Often, for BaGoL analyses, it is simpler to use a single, large, encompassing
 % ROI rather than a series of small ROIs.
 oneROI = false;
-%oneROI = true;
+% oneROI = true;
 if oneROI
    ROI_sizes = [256, 256] * Pixel2nm;   % (nm)
    A_ROI = prod(ROI_sizes);
 end
 
 % Select the files starting from start_datadir.
-start_datadir =  'C:\Users\imadams\Documents\smite workspace\Hek ALFA-EGFR (L858R) BaGoL\Clustering\Results';
+start_datadir =  'C:\Users\imadams\Documents\smite workspace\20250822_sorted_CHOHAEGFR\Export_data\Export_data_test_fits';
 
 fprintf('Done set parameters.\n');
 %% ----------- Define the ROIs
@@ -139,6 +139,9 @@ fprintf('Done ROIs.\n');
 %            (MF BaGoL Results or BaGoL MAPN files)
 % NOTE: the two sets of files should be in corresponding order.
 % Previously defined ROIs for a series of images.
+
+MAPNfile = false;
+
 [pathnameR, filesR] = smi_helpers.selectFiles(start_datadir, ...
                            '_ROIs.mat files', '*_ROIs.mat');
 % BaGoL MAPN or Results/ResultStruct files.
