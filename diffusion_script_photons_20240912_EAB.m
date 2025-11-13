@@ -2,8 +2,8 @@
 
 %% Define some directories and parameters.
 FrameRate = 20;        % frames per second
-PixelSize = 0.067708;   % um
-% PixelSize = 0.1667;
+%PixelSize = 0.067708;   % um
+PixelSize = 0.1667;
 SMF = smi_core.SingleMoleculeFitting;
 SMF.Data.FrameRate = FrameRate;
 SMF.Data.PixelSize = PixelSize;
@@ -15,36 +15,34 @@ NComponents = 3; % number of diffusing components for CDF/MLE fitting
 %       frames (e.g., +3) to retain per trajectory.
 %       if MaxFrameNum > 0 and < 1 (e.g., 0.3), then it is the fraction of the
 %       frames (e.g., 30%) to retain per trajectory.
-% MinFrameNum = 1;   MaxFrameNum = Inf;   % all frames from 1 to Inf per traj
+MinFrameNum = 1;   MaxFrameNum = Inf;   % all frames from 1 to Inf per traj
 %MinFrameNum = -10;   MaxFrameNum = 50;  % first 10 frames per trajectory
 %MinFrameNum = 1;   MaxFrameNum = 0.2;   % first 20% of the frames per traj
 % Specify the maximum starting frame number for a trajectory to be included in
 % the diffusion analyses.
-% MaxStartingFrameNum = 100;
+MaxStartingFrameNum = 100;
 %MaxStartingFrameNum = 3;
-% 
-% BaseDir = 'O:\Cell Path\Lidke Lab\IMAdams\Data\HeLa-ALFA-EGFR-KI\HelaALFAEGFR_10242025\data_dot_mat\';
-% ConditionNames = ...   
-%     { 'ALFA-EGFR Resting'...
-%     'ALFA-EGFR +EGF'...    
-%     'HA-TGFBR2 Resting'...
-%     'HA-TGFBR2 +EGF'...
-%     };
- BaseDir = 'O:\Cell Path\Lidke Lab\Angela\Data\IX83 QD-SPT\251029 Hek293 RON-mNG\data_dot_mat';
+
+BaseDir = 'O:\Cell Path\Lidke Lab\Angela\Data\SPT\20250819_Hek80200\Results0819';
 ConditionNames = ...   
-    { 'HA-RON HIGH Rest'...
-    'HA-RON HIGH +MSP'...
-    'HA-RON MID Rest'...
-    'HA-RON MID +MSP'...
+    {'HA-RON Resting 1'...
+    'HA-RON +EGF'...
+    'HA-RON Resting 2'...
+    'HA-RON +MSP'
     };
+    % {'ALFA-EGFR Resting 1'
+    % 'ALFA-EGFR +EGF'...
+    % % 'ALFA-EGFR Resting 2'...
+    % % 'ALFA-EGFR + AREG'
+    % };
  
     % 'HA-TGFBR2 Resting 2'...
     % 'HA-TGFBR2 +TGF-B'};
 
-SaveDir = fullfile(BaseDir, 'D-analysis');
-% SaveDir = 'O:\Cell Path\Lidke Lab\IMAdams\Data\CHO-HA-EGFR-L858R\Single particle tracking\20251016_CHO_WThv2_serumpilot\Results1020\D_10202025';
+%SaveDir = fullfile(BaseDir, 'OUT');
+SaveDir = ['O:\Cell Path\Lidke Lab\Angela\Data\SPT\20250819_Hek80200\Results0819\D_analysis'];
 
-filterBy = 'Results.mat';
+filterBy = '1_Results.mat';
 
 NConditions = numel(ConditionNames);
 FileList = cell(NConditions, 1);
@@ -64,8 +62,8 @@ end
 %% Loop through the TR structures and estimate the diffusion constants.
 DEstimator = smi_stat.DiffusionEstimator([], SMF);
 DEstimator.UnitFlag = true;
-DEstimator.FrameLagRange = [1, inf];   % Range of frame lags used to estimate D (Default = [1, 5])
-DEstimator.NFitPoints = 5; % Number of MSD points to be fit (scalar, integer)(Default = 5)
+DEstimator.FrameLagRange = [1, inf];
+DEstimator.NFitPoints = 5;
 DEstimator.FitMethod = 'WeightedLS';
 DEstimator.FitTarget = 'MSD';
 % Indexed by {condition #}
@@ -97,12 +95,10 @@ for dd = 1:NConditions
             end
         end
 
-        % % Choose a frame number window from the TR structure. Specify
-        % MinFrameNum, MaxFrameNum
+        % Choose a fram number window from the TR structure.
+        TR = smi_core.TrackingResults.windowTR(TR, MinFrameNum, MaxFrameNum);
+        TR = smi_core.TrackingResults.windowStartTR(TR, MaxStartingFrameNum);
         
-        % TR = smi_core.TrackingResults.windowTR(TR, MinFrameNum, MaxFrameNum);
-        % TR = smi_core.TrackingResults.windowStartTR(TR, MaxStartingFrameNum);
-        % 
         % Estimate the trajectory-wise diffusion constants (one diffusion
         % constant per trajectory, excluding trajectories that were too
         % short).
@@ -148,7 +144,7 @@ for dd = 1:NConditions
     NJumpsFit(dd) = sum(DEstimator.MSDEnsemble.NPoints(DEstimator.NFitPoints));
 end
 
-% Repeat above but estimate D from CDF of jumps (instead of fitting an MSD)
+%% Repeat above but estimate D from CDF of jumps (instead of fitting an MSD)
 DEstimator = smi_stat.DiffusionEstimator([], SMF);
 DEstimator.UnitFlag = true;
 DEstimator.FrameLagRange = [2, 2];
@@ -176,10 +172,10 @@ for dd = 1:NConditions
             end
         end
 
-        % Choose a frame number window from the TR structure.
-        % TR = smi_core.TrackingResults.windowTR(TR, MinFrameNum, MaxFrameNum);
-        % TR = smi_core.TrackingResults.windowStartTR(TR, MaxStartingFrameNum);
-        % 
+        % Choose a fram number window from the TR structure.
+        TR = smi_core.TrackingResults.windowTR(TR, MinFrameNum, MaxFrameNum);
+        TR = smi_core.TrackingResults.windowStartTR(TR, MaxStartingFrameNum);
+        
         % Concatenate the TR into TRAll.
         TRAll = smi_core.TrackingResults.catTR(TRAll, TR);
     end
@@ -192,7 +188,7 @@ for dd = 1:NConditions
     NJumps(dd) = numel(DEstimator.MSDEnsemble.CDFOfJumps);
 end
 
-%Plot some results.
+%% Plot some results.
 % Plot the MSD for all conditions (ensemble over trajectories and cells).
 PlotAxes = axes(figure());
 hold(PlotAxes, 'on')
@@ -202,14 +198,12 @@ for nn = 1:NConditions
     plot(PlotAxes, MSDEnsemble{nn}.FrameLags/SMF.Data.FrameRate, ...
         MSDEnsemble{nn}.MSD*(SMF.Data.PixelSize^2), ...
         'LineWidth', 2, 'Color', ConditionColors(nn, :))
-    LegendEntries{nn} = sprintf('%s', ...
-        ConditionNames{nn}); % remove D from legend
     LegendEntries{nn} = sprintf('%s (D=%.4f\\pm%.4f \\mum^2s^{-1})', ...
         ConditionNames{nn}, DEnsemble(nn), 1.96*DEnsembleSE(nn));
 end
 PlotAxes.FontWeight = 'bold';
-PlotAxes.XLim = [0, 1];
-legend(PlotAxes, LegendEntries, 'Location', 'northwest')
+PlotAxes.XLim = [0, 2];
+legend(PlotAxes, LegendEntries, 'Location', 'best')
 xlabel(PlotAxes, '\Deltat (s)', 'Interpreter', 'tex', 'FontWeight', 'bold')
 ylabel(PlotAxes, 'MSD (\mum^2)', 'Interpreter', 'tex', 'FontWeight', 'bold')
 if ~isempty(SaveDir)
@@ -326,45 +320,42 @@ if ~isempty(SaveDir)
    saveas(gcf, fullfile(SaveDir, 'TrajDCoeffperCond.fig'));
 end
 
-% export N vals
-IMA_exportD_est_Nvals(ConditionNames, NCells, NTraj, CDFs, fullfile(SaveDir, 'summary.txt'), 'Format', 'detailed')
-
 % Plot the the average photon count for each trajectory.
-% PlotAxes = axes(figure());
-% hold(PlotAxes, 'on')
-% plotSpread(PlotAxes, MeanPhotonsAllTraj, ...
-%     'spreadWidth', 0.5, 'distributionColors', ConditionColors)
-% for nn = 1:NConditions
-%     % Add a horizontal line at the mean value.
-%     plot(PlotAxes, nn + 0.25*[-1, 1], mean(MeanPhotonsAllTraj{nn})*[1, 1], ...
-%         'Color', [0, 0, 0], 'LineWidth', 2)
-% end
-% PlotAxes.XLim = [0, NConditions+1];
-% PlotAxes.XTick = 1:NConditions;
-% PlotAxes.XTickLabel = ConditionNames;
-% PlotAxes.XTickLabelRotation = 45;
-% PlotAxes.FontWeight = 'bold';
-% ylabel(PlotAxes, 'mean photons', 'Interpreter', 'tex', ...
-%     'FontWeight', 'bold')
-% title(PlotAxes, 'Trajectory mean photons')
-% if ~isempty(SaveDir)
-%    saveas(gcf, fullfile(SaveDir, 'TrajPhotonsperCond.png'));
-%    saveas(gcf, fullfile(SaveDir, 'TrajPhotonsperCond.fig'));
-% end
+PlotAxes = axes(figure());
+hold(PlotAxes, 'on')
+plotSpread(PlotAxes, MeanPhotonsAllTraj, ...
+    'spreadWidth', 0.5, 'distributionColors', ConditionColors)
+for nn = 1:NConditions
+    % Add a horizontal line at the mean value.
+    plot(PlotAxes, nn + 0.25*[-1, 1], mean(MeanPhotonsAllTraj{nn})*[1, 1], ...
+        'Color', [0, 0, 0], 'LineWidth', 2)
+end
+PlotAxes.XLim = [0, NConditions+1];
+PlotAxes.XTick = 1:NConditions;
+PlotAxes.XTickLabel = ConditionNames;
+PlotAxes.XTickLabelRotation = 45;
+PlotAxes.FontWeight = 'bold';
+ylabel(PlotAxes, 'mean photons', 'Interpreter', 'tex', ...
+    'FontWeight', 'bold')
+title(PlotAxes, 'Trajectory mean photons')
+if ~isempty(SaveDir)
+   saveas(gcf, fullfile(SaveDir, 'TrajPhotonsperCond.png'));
+   saveas(gcf, fullfile(SaveDir, 'TrajPhotonsperCond.fig'));
+end
 
-% for nn = 1:NConditions
-%    figure();
-%    hold on
-%    plot(MeanPhotonsAllTraj{nn}, DAllTrajIsolated{nn}, 'k.');
-%    title(ConditionNames{nn});
-%    xlabel('mean photons per trajectory');
-%    ylabel('D (\mum^2s^{-1}) per trajectory');
-%    hold off
-%    if ~isempty(SaveDir)
-%       saveas(gcf, fullfile(SaveDir, sprintf('DvsPhotonsCond%d.png', nn)));
-%       saveas(gcf, fullfile(SaveDir, sprintf('DvsPhotonsCond%d.fig', nn)));
-%    end
-% end
+for nn = 1:NConditions
+   figure();
+   hold on
+   plot(MeanPhotonsAllTraj{nn}, DAllTrajIsolated{nn}, 'k.');
+   title(ConditionNames{nn});
+   xlabel('mean photons per trajectory');
+   ylabel('D (\mum^2s^{-1}) per trajectory');
+   hold off
+   if ~isempty(SaveDir)
+      saveas(gcf, fullfile(SaveDir, sprintf('DvsPhotonsCond%d.png', nn)));
+      saveas(gcf, fullfile(SaveDir, sprintf('DvsPhotonsCond%d.fig', nn)));
+   end
+end
 
 %% Loop through the TR structures and estimate the diffusion constants for a
 %% time (frame) window.

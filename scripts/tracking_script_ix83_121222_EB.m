@@ -19,6 +19,7 @@ clear Channel_1
 CalResults = cal_readnoise(BeadData, BgData);
 CameraGain = real(1 / CalResults(2)); % ADU/e-
 CameraOffset = real(CalResults(4));
+CameraReadNoise = real(CalResults(3));
 
 %% Define directories, determine files to be tracked, and define parameters
 % Define the path to the raw data.
@@ -39,10 +40,10 @@ PixelSize = 0.067708; % micrometers
 % Define our fitting/tracking parameters for each channel.
 SMFChannel1 = smi_core.SingleMoleculeFitting;
 SMFChannel1.Data.DataVariable = 'Channel_1';
-SMFChannel1.Data.CameraType='EMCCD';
-SMFChannel1.Data.CameraGain = CameraGain; % ADU/e-
-SMFChannel1.Data.CameraOffset = CameraOffset;
-SMFChannel1.Data.CameraReadNoise = 9896.27;
+SMFChannel1.Data.CameraType='SCMOS';
+% SMFChannel1.Data.CameraGain = CameraGain; % ADU/e-
+% SMFChannel1.Data.CameraOffset = CameraOffset;
+% SMFChannel1.Data.CameraReadNoise = 9896.27;
 SMFChannel1.Data.AnalysisID = 'Channel1';
 SMFChannel1.Data.FrameRate = FrameRate;
 SMFChannel1.Data.PixelSize = PixelSize;
