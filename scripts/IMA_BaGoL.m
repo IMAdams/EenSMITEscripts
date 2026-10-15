@@ -1,7 +1,7 @@
 %% Script for running BaGoL
 
 % Set BaGoL Directory name and basic parameters
-Results_BaGoL = 'Results_BaGoL_een3';
+Results_BaGoL = 'BaGoL_een5';
 %Results_BaGoL = 'Xi=20_1';
 
 % Generic parameters.
@@ -9,10 +9,10 @@ BaGoLParams.ImageSize = 256;        % (pixel)
 % BaGoLParams.PixelSize = 108.018;    % (nm) [TIRF]
 BaGoLParams.PixelSize = 97.8;       % (nm) [sequential]
 BaGoLParams.OutputPixelSize = 4;    %2; % pixel size for posterior images (nm)
-BaGoLParams.N_Burnin = 32000;        % Length of Burn-in chain
-BaGoLParams.N_Trials = 8000;        % Length of post-burn-in chain
-%BaGoLParams.N_Burnin = 8000;        % Length of Burn-in chain
-%BaGoLParams.N_Trials = 4000;        % Length of post-burn-in chain
+% BaGoLParams.N_Burnin = 32000;        % Length of Burn-in chain
+% BaGoLParams.N_Trials = 8000;        % Length of post-burn-in chain
+BaGoLParams.N_Burnin = 8000;        % Length of Burn-in chain
+BaGoLParams.N_Trials = 4000;        % Length of post-burn-in chain
 BaGoLParams.NSamples = 10;          % Number of samples before sampling Xi
 BaGoLParams.ClusterDrift = 0;       % Expected magnitude of drift (nm/frame)
 
@@ -58,7 +58,7 @@ BaGoLParams.Xi = [20, 1];           % [k, theta] parameters for gamma prior
 
 % If ROIs is true, the input file has ROIs already defined (*_ROIs.mat), so use
 % them below if only one filename is provided.
-% ROIs = true;
+ROIs = true;
 % ROIs = true;
 
 %% Select files to BaGoL-ize and run hierBaGoL
@@ -74,9 +74,9 @@ BaGoLParams.Xi = [20, 1];           % [k, theta] parameters for gamma prior
 % ### with fullfile.
 %'BaGoLHier/Data_2020-10-8-17-58-54_Results.mat'
 % 
-pDir = 'C:\Users\imadams\Documents\smite workspace\BaGoL_test_ROIvsCELL\Analysis';
+pDir = 'C:\Users\imadams\Documents\smite workspace\20251024_hela\BaGoL_ROIim';
 
-Files = {fullfile(pDir, 'Cell_04_Label_01_Data_2025-2-4-L858R-rest_eenOptim_04_Results')};
+Files = {fullfile(pDir, 'Data_2025-10-27-20-8-7_een0910_Results.mat')};
 
 
 
@@ -87,12 +87,12 @@ Files = {fullfile(pDir, 'Cell_04_Label_01_Data_2025-2-4-L858R-rest_eenOptim_04_R
 % [YStart, XStart, YEnd, XEnd] = [163, 385, 233, 455]
 % [Xmin, Xmax, Ymin, Ymax] (pixel)
 % [385, 455, 163, 233]
-ROIsFile = load(fullfile(pDir, 'Cell_04_Label_01_Data_2025-2-4-L858R-rest_eenOptim_04_Results_ROIs.mat'));
-ROI5 = ROIsFile.RoI(5);
-rOi5=ROI5{:}.ROI;
-ROI6 = ROIsFile.RoI(6);
-rOi6=ROI6{:}.ROI;
-DataROI = [rOi5, rOi6];
+% ROIsFile = load(fullfile(pDir, 'Analysis','Data_2025-10-27-18-16-52_eEn_smf_J_Results_ROIs.mat'));
+% ROI5 = ROIsFile.RoI(5);
+% rOi5=ROI5{:}.ROI;
+% ROI6 = ROIsFile.RoI(6);
+% rOi6=ROI6{:}.ROI;
+% DataROI = [rOi5, rOi6];
 % [
 %[120, 136, 190, 206]
 %[110, 126,  90, 106]
@@ -101,31 +101,37 @@ DataROI = [rOi5, rOi6];
 % Special case in which a single file is broken up into pre-selected ROIs if
 % the variable ROIs is set to true.  The ROIs are processed via a parfor loop
 % in smi.BaGoL.hierBaGoL_run.  See also comments at the top of this function.
-% if numel(Files) == 1 && ROIs
-%   [DataDir, File, Ext] = fileparts(Files{1});
-%   basename = fullfile(DataDir, 'Analysis', File);
-%    % Assume SMD files are of the form Cell_nn_Label_0n_Results.mat and ROI
-%    % files are of the form Cell_nn_Label_01_Results_ROIs.mat (and are located
-%    % in the subdirectory 'Analysis' of DataDir).
-%   filename = regexprep(basename, 'Label_02', 'Label_01');
-% 
-%    % ROIsFile = load([filename, '_ROIs.mat']);
-%    ROIsFile = load('C:\Users\imadams\Documents\smite workspace\BaGoL_test_ROIvsCELL\Analysis\Cell_04_Label_01_Data_2025-2-4-L858R-rest_eenOptim_04_Results_ROIs.mat')
-%    n_ROIs = numel(ROIsFile.RoI);
-%    DataROI = zeros(n_ROIs, 4);
-%    for i = 1 : n_ROIs
-%      DataROI(i, :) = ROIsFile.RoI{i}.ROI ./ BaGoLParams.PixelSize;
-%   end
-n_ROIs = numel(DataROI(:,1));
-   % Files = cell(n_ROIs, 1);
-   % for i = 1 : n_ROIs
-   %   Files{i} = sprintf('%s_ROI_%02d.mat', basename, i);
-   % end
+if numel(Files) == 1 && ROIs
+   [DataDir, File, Ext] = fileparts(Files{1});
+   basename = fullfile(DataDir, 'Analysis', File);
+   % Assume SMD files are of the form Cell_nn_Label_0n_Results.mat and ROI
+   % files are of the form Cell_nn_Label_01_Results_ROIs.mat (and are located
+   % in the subdirectory 'Analysis' of DataDir).
+   filename = regexprep(basename, 'Label_02', 'Label_01');
+ 
 
-% end
+   ROIsFile = load([filename, '_ROIs.mat']);
+   n_ROIs = numel(ROIsFile.RoI);
+   DataROI = zeros(n_ROIs, 4);
+   for i = 1 : n_ROIs
+      DataROI(i, :) = ROIsFile.RoI{i}.ROI ./ BaGoLParams.PixelSize;
+   end
+
+   Files = cell(n_ROIs, 1);
+   for i = 1 : n_ROIs
+      Files{i} = sprintf('%s_ROI_%02d.mat', basename, i);
+   end
+
+end
+pwd()
 
 %% ----------------------------------------------------------------------
 % BaGoLParams.Verbose = 5
-% Run the BaGoL analyses.
-smi.BaGoL.hierBaGoL_run(Files, DataROI, Results_BaGoL, BaGoLParams);
+% % Run the BaGoL analyses.
+smi.BaGoL.hierBaGoL_run(Files, DataROI, Results_BaGoL, BaGoLParams, ROIs);
+fprintf('Done BaGoL.\n')
+
+% for i = 1:n_ROIs
+%     smi.BaGoL.hierBaGoL_run(Files, DataROI(i,:), Results_BaGoL, BaGoLParams);
+% end
 fprintf('Done BaGoL.\n')

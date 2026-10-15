@@ -2,19 +2,24 @@
 %%%IMPORTANT: This script only works on 1 or 2 channel data from the Olympus IX83%%%
 %%%When you choose files, only choose appropriate files in groups for the sections below
 
+% base directory for processing
+BaseDir = 'E:\LidkeLab\iX83\20251113_HeLa_ALFAEGFR_HATGFBR2';
+
 % Define the directory containing the raw data.
-%RawDataDir = 'O:\Cell Path\Lidke Lab\Emmy\Data\SiMPull_TCells\20250613_PD-1peptides-anti-alfa488_EGFR-GFP_PD-1-GFP';
 RawDataDir = ...
-    'O:\Cell Path\Lidke Lab\Angela\Data\IX83 QD-SPT\251029 Hek293 RON-mNG';
-%allfiles = ...
-%    selectMultipleFiles(RawDataDir, '.vsi', 'Select vsi Files to Combine');
-allfiles = uipickfiles('FilterSpec', RawDataDir, 'REFilter', '\.vsi', ...
-                       'Prompt', 'Select vsi Files to Combine')';
+    'DATA_11132025_iX83';
+RawDataDir = fullfile(BaseDir, RawDataDir);
+
 % Define a save directory in which the tracking results will be stored.
-SaveDir = fullfile(RawDataDir, 'data_dot_mat');
+
+SaveDir = 'data_dot_mat';
+SaveDir = fullfile(BaseDir, SaveDir);
 if not(isfolder(SaveDir))
     mkdir(SaveDir);
 end
+
+allfiles = uipickfiles('FilterSpec', RawDataDir, 'REFilter', '\.vsi', ...
+                       'Prompt', 'Select vsi Files to Combine')';
 
 %SUGGESTION Can we add something to decifer if the second channel is 561 or 647?
 %Essenitally, if we were able to do this we could ensure the data setjoined

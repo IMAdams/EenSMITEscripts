@@ -10,18 +10,21 @@
 %        Data01_Channel2_Results.mat).
 
 
-DataDir = ('O:\Cell Path\Lidke Lab\IMAdams\Cos-7-ALFA-Her2-S310F\SPT ix71 Cos-7 ALFA-Her2 cells\20250410_cos7ALFAHER2_antiALFA_EGFqd\Results1');
+DataDir = ('O:\Cell Path\Lidke Lab\IMAdams\Data\HeLa-ALFA-EGFR-KI\20251113_HeLa_ALFAEGFR_HATGFBR2\data_dot_mat\Results_1224');
 ResultsDir = DataDir ;% fullfile(DataDir, 'Results');
-FilePatterns = {'*Channel1_Results.mat'; '*Channel2_Results.mat'};
-DimerSeparation = 0.27; % Separation between fluorophores on a dimer (pixels)
+FilePatterns = {'*ch1_Results.mat'; '*ch2_Results.mat'};
 
-MaxSeparation = 16; % Max. separation for dimer candidates (pre-processing) (pixels)
+% Separation between fluorophores on a dimer (pixels)
+
+    DimerSeparation = 083; % 0.045 um expected dimer distance / 0.0541 um pixel
+
+    MaxSeparation = 5; % Max. separation for dimer candidates (pre-processing) (pixels)
 
 DomainSeparation = 5; % Typical domain size for the free, dimer, domain model (pixels)
 ModelSpecifier = 'DF';
     % 'DDF': dimer, domain, free
     % 'DF': dimer, free
-MinValidPoints = 1; %
+MinValidPoints = 100; %
 Verbose = 2;
 [TRArray, SMFArray, FileList] = smi_stat.HMM.findDimerCandidatesFromFiles(...
 ResultsDir, FilePatterns, DimerSeparation, MaxSeparation, MinValidPoints, Verbose);
@@ -30,15 +33,15 @@ ResultsDir, FilePatterns, DimerSeparation, MaxSeparation, MinValidPoints, Verbos
 
 % NOTE: You can also do this on a per-trajectory basis if needed.
 
-DC = 0.15; % Diffusion Coefficient 
+DC = 0.015; % Diffusion Coefficient 
 TRArray(1).DiffusionCoefficient = DC;
 TRArray(2).DiffusionCoefficient = DC;
-saveDirectory= fullfile(ResultsDir, 'HMM_MVP10_Dimer0.27_MaxSep16DF');
+saveDirectory= fullfile(ResultsDir, 'HMM_MVP100_Dimer083_MaxSep5DF');
 
 %% Prepare the HMM class and run the analysis.
-% SMF = smi_core.SingleMoleculeFitting;
-% SMF.Data.FrameRate = 20; % fps, specific to the loaded TRs above
-% SMF.Data.PixelSize = 0.1667; % micrometers, specific to the loaded TRs above
+SMF = smi_core.SingleMoleculeFitting;
+SMF.Data.FrameRate = 20; % fps, specific to the loaded TRs above
+SMF.Data.PixelSize = 0.0541; % micrometers, specific to the loaded TRs above
 HMM = smi_stat.HMM(TRArray, SMFArray);
 HMM.MaxSeparation = MaxSeparation;  % Max. separation for dimer candidates (pre-processing) (pixels)
 HMM.DimerSeparation = DimerSeparation ; % Separation between fluorophores on a dimer (pixels)
@@ -46,10 +49,10 @@ HMM.DomainSeparation = DomainSeparation; % Typical domain size for the free, dim
 HMM.ModelSpecifier = ModelSpecifier;
 HMM.SaveDir = saveDirectory;
 HMM.GeneratePlots = [true; true]; % [basic plots; summary plots]
-HMM.GenerateMovies = true;
+HMM.GenerateMovies = false;
 HMM.UnitFlag = 0; % 0 will plot in units of pixels
 HMM.RateParametersGuess = []; % set to [] for model 'ddf'
-HMM.Verbose = 3;
+HMM.Verbose = 2;
 %HMM.StateNames = {'Dimer';'Domain';'Free'};
 HMM.MovieParams.PercentileFloor = 10;
 performFullAnalysis(HMM)

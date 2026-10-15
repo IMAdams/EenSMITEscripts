@@ -23,10 +23,12 @@ MinFrameNum = 1;   MaxFrameNum = Inf;   % all frames from 1 to Inf per traj
 MaxStartingFrameNum = 100;
 %MaxStartingFrameNum = 3;
 
-BaseDir = 'O:\Cell Path\Lidke Lab\IMAdams\Connor\Single particle tracking\20250715_HeLa_CRISPR_ALFA-EGFR_HA-TGFBR2_SPTV1\Results1';
+BaseDir = 'O:\Cell Path\Lidke Lab\Angela\Data\SPT\20250819_Hek80200\Results0819';
 ConditionNames = ...   
-    {'HA-TGFBR2 Resting'...
-    'HA-TGFBR2 +EGF'...
+    {'HA-RON Resting 1'...
+    'HA-RON +EGF'...
+    'HA-RON Resting 2'...
+    'HA-RON +MSP'
     };
     % {'ALFA-EGFR Resting 1'
     % 'ALFA-EGFR +EGF'...
@@ -38,9 +40,9 @@ ConditionNames = ...
     % 'HA-TGFBR2 +TGF-B'};
 
 %SaveDir = fullfile(BaseDir, 'OUT');
-SaveDir = ['O:\Cell Path\Lidke Lab\IMAdams\Connor\Single particle tracking\20250715_HeLa_CRISPR_ALFA-EGFR_HA-TGFBR2_SPTV1\Results1\D_HA_0813'];
+SaveDir = ['O:\Cell Path\Lidke Lab\Angela\Data\SPT\20250819_Hek80200\Results0819\D_analysis'];
 
-filterBy = '2_Results.mat';
+filterBy = '1_Results.mat';
 
 NConditions = numel(ConditionNames);
 FileList = cell(NConditions, 1);

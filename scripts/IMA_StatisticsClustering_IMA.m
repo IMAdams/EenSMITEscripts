@@ -63,7 +63,7 @@ ROI_sizes = [2000, 2000];   % [delta_x, delta_y] (nm)
 A_ROI = prod(ROI_sizes);    % ROI area (nm^2)
 %Pixel2nm = 16000/150;       % conversion factor from pixels to nm
 %Pixel2nm = 108.018;         % pixels to nm [TIRF]
-Pixel2nm = 65.0;            % pixels to nm [sequential]
+Pixel2nm = 97.8;            % pixels to nm [sequential]
 Pixel2nmGlobal = Pixel2nm;
 CI = smi_cluster.ClusterInterface();
 
@@ -94,7 +94,7 @@ if oneROI
 end
 
 % Select the files starting from start_datadir.
-start_datadir =  'C:\Users\imadams\Documents\smite workspace\20250822_sorted_CHOHAEGFR\Export_data\Export_data_test_fits';
+start_datadir =  'C:\Users\imadams\Documents\smite workspace\20251024_hela\BaGoL_wholeim_Rest_06\BaGoL_1201';
 
 fprintf('Done set parameters.\n');
 %% ----------- Define the ROIs
@@ -102,7 +102,7 @@ fprintf('Done set parameters.\n');
                        '_Results*.mat files', '*_Results.mat');
 %files = uipickfiles(FilterSpec, start_datadir, REFilter, ...
 %                    '_Results*\.mat', 'Prompt', '_Results*.mat files');
-results_dir = fullfile(pathname, 'Analysis');
+results_dir = fullfile(pathname, 'ROIs_from_SR');
 % Create results_dir if it does not already exist.
 if ~isfolder(results_dir)
    mkdir(results_dir);
@@ -140,7 +140,7 @@ fprintf('Done ROIs.\n');
 % NOTE: the two sets of files should be in corresponding order.
 % Previously defined ROIs for a series of images.
 
-MAPNfile = false;
+MAPNfile = true;
 
 [pathnameR, filesR] = smi_helpers.selectFiles(start_datadir, ...
                            '_ROIs.mat files', '*_ROIs.mat');
@@ -161,6 +161,9 @@ CI.defineBaGoLROIs(pathnameR, filesR, pathnameB, filesB, MAPNfile, ...
 [pathnameR, filesR] = smi_helpers.selectFiles(start_datadir, ...
                          '_ROIs.mat file', '*_ROIs.mat');
 % BaGoL MAPN or Results/ResultStruct files.
+MAPNfile = true;
+keep_numbering = true;
+
 if MAPNfile
    [pathnameB, filesB] = smi_helpers.selectFiles(pathnameR, ...
                             'MAPN*_ROI_*.mat files', 'MAPN_*_ROI_*.mat');
@@ -171,6 +174,9 @@ else
 end
 CI.combineBaGoLROIs(pathnameR, filesR, pathnameB, filesB, MAPNfile, ...
                     keep_numbering);
+
+% This requieres that the *ROIs.mat files and the MAPN*ROI_*.mat files have
+% *Cell_06*Label_01* in the filename (
 
 %% ---------- Possibly, filter out some ROIs
 % Interactive input.
@@ -210,10 +216,10 @@ base_name = condition;
 % Minimum distance between clusters or maximum distance between points in a
 % cluster.
 %E_range = [30, 40, 50];   % (nm)
-E_range = [15];   % (nm)
+E_range = [16];   % (nm)
 % Minimum number of points in a cluster.
 %minPts_range = [3, 6, 10];
-minPts_range = [2];
+minPts_range = [3];
 % Clustering algorithm.
 %algorithm_range = {'DBSCAN', 'Hierarchical', 'Voronoi'};
 algorithm_range = {'DBSCAN'};
