@@ -28,66 +28,62 @@ function exportStructToText(SMF, filename)
     % Open the file for writing
     fileID = fopen(filename, 'w');
     
-    % Get all field names from the struct
-    % if isstruct(SMF)
-        fields = fieldnames(SMF);
-    % else
-    %     fields = 1;
-    % end
-    
     % Write header
     fprintf(fileID, 'SMF Parameters Export\n');
     fprintf(fileID, '===================\n\n');
-    
-    % Iterate through all fields
-    for i = 1:length(fields)
-        currentField = fields{i};
-        value = SMF.(currentField);
-        
-        % Handle different data types
-        if isnumeric(value)
-            if isscalar(value)
-                % For single numbers
-                fprintf(fileID, '%s: %.6f\n', currentField, value);
+
+    writeStruct(fileID, SMF, 0);
+
+    % Close the file
+    fclose(fileID);
+end
+
+function writeStruct(fileID, S, depth)
+    % Recursively write all fields of struct S, indenting by depth.
+    maxElements = 20;  % arrays larger than this are summarized, not listed
+    indent = repmat('\t', 1, depth);
+    fields = fieldnames(S);
+    for i = 1:numel(fields)
+        name = fields{i};
+        value = S.(name);
+
+        if isstruct(value) && isscalar(value)
+            fprintf(fileID, [indent '%s (nested struct):\n'], name);
+            writeStruct(fileID, value, depth + 1);
+        elseif islogical(value) && isscalar(value)
+            % Must be checked alongside numeric: isnumeric(true) is false
+            if value
+                fprintf(fileID, [indent '%s: true\n'], name);
+            else
+                fprintf(fileID, [indent '%s: false\n'], name);
+            end
+        elseif islogical(value) || isnumeric(value)
+            if isempty(value)
+                fprintf(fileID, [indent '%s: []\n'], name);
+            elseif isscalar(value)
+                fprintf(fileID, [indent '%s: %.6f\n'], name, value);
+            elseif numel(value) > maxElements
+                % Large data array: write a summary instead of every value
+                sz = sprintf('%dx', size(value));
+                fprintf(fileID, [indent '%s: [%s %s array, %d elements; min %.6g, max %.6g] (not exported)\n'], ...
+                    name, sz(1:end-1), class(value), numel(value), ...
+                    double(min(value(:))), double(max(value(:))));
             elseif isvector(value)
-                % For vectors
-                fprintf(fileID, '%s: [', currentField);
+                fprintf(fileID, [indent '%s: ['], name);
                 fprintf(fileID, '%.6f ', value);
                 fprintf(fileID, ']\n');
             elseif ismatrix(value)
-                % For matrices
-                fprintf(fileID, '%s:\n', currentField);
+                fprintf(fileID, [indent '%s:\n'], name);
                 for row = 1:size(value, 1)
-                    fprintf(fileID, '\t');
+                    fprintf(fileID, [indent '\t']);
                     fprintf(fileID, '%.6f ', value(row, :));
                     fprintf(fileID, '\n');
                 end
             end
         elseif ischar(value)
-            % For strings
-            fprintf(fileID, '%s: %s\n', currentField, value);
-        elseif islogical(value)
-            % For boolean values
-            if value
-                fprintf(fileID, '%s: true\n', currentField);
-            else
-                fprintf(fileID, '%s: false\n', currentField);
-            end
-        elseif isstruct(value)
-            % For nested structs
-            fprintf(fileID, '%s (nested struct):\n', currentField);
-            nestedFields = fieldnames(value);
-            for j = 1:length(nestedFields)
-                nestedValue = value.(nestedFields{j});
-                if isnumeric(nestedValue) && isscalar(nestedValue)
-                    fprintf(fileID, '\t%s: %.6f\n', nestedFields{j}, nestedValue);
-                elseif ischar(nestedValue)
-                    fprintf(fileID, '\t%s: %s\n', nestedFields{j}, nestedValue);
-                end
-            end
+            fprintf(fileID, [indent '%s: %s\n'], name, value);
+        elseif isstring(value) && isscalar(value)
+            fprintf(fileID, [indent '%s: %s\n'], name, char(value));
         end
     end
-    
-    % Close the file
-    fclose(fileID);
 end
